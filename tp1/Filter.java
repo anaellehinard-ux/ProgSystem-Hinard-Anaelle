@@ -1,10 +1,8 @@
 import java.io.*;
-import java.util.Scanner;
 
 public class Filter {
 
     public static void main(String[] args) {
-        // Vérification des arguments
         if (args.length < 3) {
             System.err.println("Usage: java Filter <input_file> <output_file> <filter_type>");
             System.err.println("You should provide an input and an output filenames and a filter type. Aborting");
@@ -17,11 +15,10 @@ public class Filter {
 
         Image source = null;
 
-        // Lecture de l'image
-        try {
-            source = Image.read(inputFilename);
-        } catch (IOException e) {
-            System.err.println("Error reading input file: " + e.getMessage());
+        // Adaptation du nom de la méthode de lecture (ex: read_txt ou read_bin)
+        source = Image.read_txt(inputFilename);
+        if (source == null) {
+            System.err.println("Error reading input file.");
             System.exit(-1);
         }
 
@@ -32,22 +29,30 @@ public class Filter {
         // Application du filtre pixel par pixel
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                int rouge = source.getRed(x, y);
-                int vert = source.getGreen(x, y);
-                int bleu = source.getBlue(x, y);
+                // Remplacement des getters par l'accès au tableau ou méthodes personnalisées
+                int rouge = source.getPixelRed(x, y);
+                int vert = source.getPixelGreen(x, y);
+                int bleu = source.getPixelBlue(x, y);
 
                 switch (filterType.toLowerCase()) {
                     case "copy":
-                        // TODO
+                        destination.setPixel(x, y, rouge, vert, bleu);
                         break;
                     case "dark":
-                        // TODO
+                        // Assombrir : diviser l'intensité par 2
+                        destination.setPixel(x, y, rouge / 2, vert / 2, bleu / 2);
                         break;
                     case "bright":
-                        // TODO
+                        // Éclaircir : multiplier par 1.5 en plafonnant à 255
+                        int rB = Math.min(255, (int)(rouge * 1.5));
+                        int gB = Math.min(255, (int)(vert * 1.5));
+                        int bB = Math.min(255, (int)(bleu * 1.5));
+                        destination.setPixel(x, y, rB, gB, bB);
                         break;
                     case "grayscale":
-                        // TODO
+                        // Niveau de gris : moyenne des 3 composantes
+                        int gris = (rouge + vert + bleu) / 3;
+                        destination.setPixel(x, y, gris, gris, gris);
                         break;
                     default:
                         System.err.println("Unknown filter type: " + filterType);
@@ -56,12 +61,8 @@ public class Filter {
             }
         }
 
-        // Sauvegarde de l'image filtrée
-        try {
-            destination.write(outputFilename);
-            System.out.println("Filtered image saved to " + outputFilename);
-        } catch (IOException e) {
-            System.err.println("Error writing output file: " + e.getMessage());
-        }
+        // Adaptation du nom de la méthode de sauvegarde
+        destination.save_txt(outputFilename);
+        System.out.println("Filtered image saved to " + outputFilename);
     }
 }
