@@ -1,11 +1,15 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class Image {
     private int width;
     private int height;
     // pixels[y][x][0=R,1=G,2=B]
-    private int[][][] pixels; // pixels[y][x][0=R,1=G,2=B]
+    private int[][][] pixels;
 
     public int getWidth() { return width; }
     public int getHeight() { return height; }
@@ -16,7 +20,7 @@ public class Image {
     public Image(int width, int height) {
         this.width = width;
         this.height = height;
-        pixels = new int[width][height][3];
+        this.pixels = new int[height][width][3];
     }
 
     /**
@@ -31,7 +35,7 @@ public class Image {
     }
 
     /**
-     * Sauvegarde l'image au format texte
+     * Sauvegarde l'image au format texte PPM (P3)
      */
     public void save_txt(String filename) throws IOException {
         FileWriter writer = new FileWriter(filename);
@@ -54,7 +58,7 @@ public class Image {
     }
 
     /**
-     * Lit un fichier texte
+     * Lit un fichier texte PPM (P3)
      */
     public static Image read_txt(String filename) throws IOException {
         Scanner lecture = new Scanner(new File(filename));
@@ -81,5 +85,60 @@ public class Image {
         }
         lecture.close();
         return imageLu;
+    }
+
+    /**
+     * Lit un fichier binaire PPM (P6)
+     */
+    public static Image read_bin(String filename) throws IOException {
+        FileInputStream fichierLu = new FileInputStream(filename);
+        Scanner lecture = new Scanner(fichierLu);
+
+        String formatDuFichier = lecture.next();
+        if (!formatDuFichier.equals("P6")) {
+            lecture.close();
+            fichierLu.close();
+            throw new IllegalArgumentException("Format non conforme, attendu: P6");
+        }
+
+        int width = lecture.nextInt();
+        int height = lecture.nextInt();
+        int color = lecture.nextInt();
+
+        lecture.nextLine();
+
+        Image imageLu = new Image(width, height);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int a = fichierLu.read();
+                int b = fichierLu.read();
+                int c = fichierLu.read();
+                imageLu.setPixel(x, y, a, b, c);
+            }
+        }
+
+        lecture.close();
+        fichierLu.close();
+        return imageLu;
+    }
+
+    /**
+     * Sauvegarde l'image au format binaire PPM (P6)
+     */
+    public void write_bin(String filename) throws IOException {
+        FileOutputStream fichierEcrit = new FileOutputStream(filename);
+
+        String header = "P6\n" + width + " " + height + "\n255\n";
+        fichierEcrit.write(header.getBytes());
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                fichierEcrit.write((byte) pixels[y][x][0]); // R
+                fichierEcrit.write((byte) pixels[y][x][1]); // G
+                fichierEcrit.write((byte) pixels[y][x][2]); // B
+            }
+        }
+        fichierEcrit.close();
     }
 }
