@@ -31,7 +31,7 @@ public class Image {
     }
 
     /**
-     * Sauvegarde l'image au format texte PPM (P3)
+     * Sauvegarde l'image au format texte
      */
     public void save_txt(String filename) throws IOException {
         FileWriter writer = new FileWriter(filename);
@@ -39,17 +39,47 @@ public class Image {
 		writer.write("3 2\n");
 		writer.write("255\n");
 		
-		for(int a = 0; a < height; a++){
-			for(int b = 0; b < width; b++){
+		for(int x = 0; x < height; x++){
+			for(int y = 0; y < width; y++){
 				
-				int c = pixels[a][b][0];
-				int d = pixels[a][b][1];
-				int e = pixels[a][b][2];
+				int a = pixels[x][y][0];
+				int b = pixels[x][y][1];
+				int c = pixels[x][y][2];
 				
-				writer.write(c + " " + d + " " + e + " ");
+				writer.write(a + " " + b + " " + c + " ");
 			}
 			writer.write("\n");
 		}
-		
+		writer.close();
+    }
+
+    /**
+     * Lit un fichier texte
+     */
+    public static Image read_txt(String filename) throws IOException {
+        Scanner lecture = new Scanner(new File(filename));
+
+        String formatDuFichier = lecture.next();
+        if (!formatDuFichier.equals("P3")) {
+            lecture.close();
+            throw new IllegalArgumentException("Format non conforme");
+        }
+
+        int width = lecture.nextInt(); // la largeur
+        int height = lecture.nextInt(); // la hauteur
+        int color = lecture.nextInt(); // le "255"
+
+        Image imageLu = new Image(width, height);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int a = lecture.nextInt();
+                int b = lecture.nextInt();
+                int c = lecture.nextInt();
+                imageLu.setPixel(x, y, a, b, c);
+            }
+        }
+        lecture.close();
+        return imageLu;
     }
 }
