@@ -24,9 +24,14 @@ public class Utils {
 
         return (b1 << 24) | (b2 << 16) | (b3 << 8) | b4;
     }
+	
     public static int writeShort(byte[] memory, int offset, short value) {
-        memory[offset] = (byte) ((value >> 8) & 0xFF);
-        memory[offset + 1] = (byte) (value & 0xFF);
+		byte b1 = (byte) ((value >> 8) & 0xFF);
+		byte b2 = (byte) (value & 0xFF);
+		
+        memory[offset] = b1;
+        memory[offset + 1] = b2;
+		
         return 2;
     }
 
@@ -79,10 +84,31 @@ public class Utils {
 	public static int writeString(byte[] memory, int offset,
 			                      String str,int maxLength) {
 
-		// TODO:
-		// 1. Convertir la chaîne en octets.
-		// 2. Copier les octets sans dépasser maxLength.
-		// 3. Nettoyer le reste de la zone avec des zéros.
+		byte[] bytes = str.getBytes();
+
+		
+        int chaineLongueur; 
+		chaineLongueur= bytes.length;
+		
+        int tailleAEcrire;
+		tailleAEcrire = chaineLongueur;
+
+        if (tailleAEcrire > maxLength) {
+            tailleAEcrire = maxLength;
+        }
+		
+		//si j n'a pas atteint tailleAEcrire alors on rajoute le texte
+        int j = 0;
+		while (j < tailleAEcrire) {
+			memory[offset + j] = bytes[j];
+			j++;
+		}
+		
+		//si j n'a pas atteint maxLength alors on rajoute des 0
+        while (j < maxLength) {
+            memory[offset + j] = 0;
+            j++;
+        }
 
 		return maxLength;
 	}
