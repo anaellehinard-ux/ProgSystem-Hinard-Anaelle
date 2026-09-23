@@ -63,15 +63,21 @@ public class Utils {
 	}
 
 	public static long readLong(byte[] memory, int offset) {
-		// TODO: Reconstituer le long.
-		return 0L;
+		
+		long b1 = memory[offset] & 0xFFL;
+		long b2 = memory[offset + 1] & 0xFFL;
+		long b3 = memory[offset + 2] & 0xFFL;
+		long b4 = memory[offset + 3] & 0xFFL;
+		long b5 = memory[offset + 4] & 0xFFL;
+		long b6 = memory[offset + 5] & 0xFFL;
+		long b7 = memory[offset + 6] & 0xFFL;
+		long b8 = memory[offset + 7] & 0xFFL;
+		
+		return (b1 << 56) | (b2 << 48) | (b3 << 40) | (b4 << 32) | (b5 << 24) | (b6 << 16) | (b7 << 8) | b8 ;
 	}
 
-	public static int writeString(
-			byte[] memory,
-			int offset,
-			String str,
-			int maxLength) {
+	public static int writeString(byte[] memory, int offset,
+			                      String str,int maxLength) {
 
 		// TODO:
 		// 1. Convertir la chaîne en octets.
