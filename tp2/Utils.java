@@ -97,32 +97,38 @@ public class Utils {
             tailleAEcrire = maxLength;
         }
 		
-		//si j n'a pas atteint tailleAEcrire alors on rajoute le texte
-        int j = 0;
-		while (j < tailleAEcrire) {
+		//copie du texte dans la mémoire
+		int j = 0;
+		for (; j < tailleAEcrire; j++) {
 			memory[offset + j] = bytes[j];
-			j++;
 		}
-		
-		//si j n'a pas atteint maxLength alors on rajoute des 0
-        while (j < maxLength) {
-            memory[offset + j] = 0;
-            j++;
-        }
+
+		//remplissage de 0
+		for (; j < maxLength; j++) {
+			memory[offset + j] = 0;
+		}
 
 		return maxLength;
 	}
 
-	public static String readString(
-			byte[] memory,
-			int offset,
-			int maxLength) {
+	public static String readString(byte[] memory, int offset, int maxLength) {
 
-		// TODO:
-		// Lire jusqu'au premier octet nul
-		// ou jusqu'à maxLength.
+		//On cherche quelle taille fais le texte
+		//on regarde tant qu'on a pas atteint a la maxLength
+		//et tant que la position dans 
+		int longueurTexte = 0;
+		while (longueurTexte < maxLength && memory[offset + longueurTexte] != 0) {
+			longueurTexte++;
+		}
+		
+		byte[] texte = new byte[longueurTexte];
+		
+		for (int i = 0; i < longueurTexte; i++) {
+			texteBytes[i] = memory[offset + i];
+		}
+		
+		return new String(texteBytes);
 
-		return "";
 	}
 
 }
