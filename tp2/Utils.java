@@ -124,10 +124,10 @@ public class Utils {
 		byte[] texte = new byte[longueurTexte];
 		
 		for (int i = 0; i < longueurTexte; i++) {
-			texteBytes[i] = memory[offset + i];
+			texte[i] = memory[offset + i];
 		}
 		
-		return new String(texteBytes);
+		return new String(texte);
 
 	}
 
