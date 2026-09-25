@@ -42,9 +42,7 @@ public class Utils {
         return (short) ((b1 << 8) | b2);
     }
 	
-	
-	
-	
+
 	public static int writeLong(byte[] memory, int offset, long value) {
 		byte b1 = (byte) ((value >> 56) & 0xFF);
 		byte b2 = (byte) ((value >> 48) & 0xFF);
