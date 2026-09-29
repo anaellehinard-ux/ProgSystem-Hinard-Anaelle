@@ -83,9 +83,25 @@ public class MemoryManager {
 		byte masque = 1 << bitPosition;
 
 		if (used) {
+			/**
+			 * explication :
+			 * Si le bit en memory[offset] est a 1 il reste a 1
+			 * Ou alors si il est a 0 comme le masque est a 1
+			 * il prend la valeur du masque.
+			 */
 			memory[offset] = (memory[offset] | masque);
 		} else {
-			memory[offset] = (memory[offset] & ~masque)
+			/**
+			 * explication :
+			 * ~masque = inverse tous les bits, donc le bit a 1
+			 * que l'on veut passe a 0
+			 * 
+			 * Si le bit est a 1 ça devient 0
+			 * Sinon le bit est a 0 ça reste a 0
+			 * Tous les autres bits sont comparé avec 1 donc ils
+			 * conservent leur valeur d'origine
+			 */
+			memory[offset] = (memory[offset] & ~masque);
 		}
 
 		return true;
@@ -98,12 +114,31 @@ public class MemoryManager {
 			return -1;
 		}
 
-		// TODO:
-		// Calculer byteIndex.
-		// Calculer bitPosition.
-		// Lire le bit.
-
-		return -1;
+		int byteIndex = blockNumber / 8;
+		int bitPosition = blockNumber % 8;
+		int offset = BITMAP_OFFSET + byteIndex;
+		
+		int byteInderx;
+		
+		/**
+		 * explication :
+		 * 
+		 * le décalage vers la droite qui amène le bit qui nous
+		 * intéresse vers la droite. Puis on va le comparer a 1.
+		 *
+		 * exemple :
+		 *
+		 * si on a l'octet = 10011000 et bitPosition = 3
+		 * après décalage on obtiens 00010011
+		 * Ensuite on le compare avec un 1;
+		 * Si quand on le compare a 1 on obtiens 1
+		 * Alors c'est occupé
+		 * Sinon si on obtiens 0 c'est libre.
+		 */
+		
+		byteInderx = (memory[offset] >> bitPosition) & 1;
+		
+		return byteInderx;
 	}
 
 	public int allocateBlock() {
