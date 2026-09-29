@@ -80,7 +80,7 @@ public class MemoryManager {
 		int bitPosition = blockNumber % 8;
 		int offset = BITMAP_OFFSET + byteIndex;
 
-		byte masque = 1 << bitPosition;
+		byte masque = (byte) (1 << bitPosition);
 
 		if (used) {
 			/**
@@ -89,7 +89,7 @@ public class MemoryManager {
 			 * Ou alors si il est a 0 comme le masque est a 1
 			 * il prend la valeur du masque.
 			 */
-			memory[offset] = (memory[offset] | masque);
+			memory[offset] = (byte) (memory[offset] | masque);
 		} else {
 			/**
 			 * explication :
@@ -101,7 +101,7 @@ public class MemoryManager {
 			 * Tous les autres bits sont comparé avec 1 donc ils
 			 * conservent leur valeur d'origine
 			 */
-			memory[offset] = (memory[offset] & ~masque);
+			memory[offset] = (byte) (memory[offset] & ~masque);
 		}
 
 		return true;
@@ -144,16 +144,16 @@ public class MemoryManager {
 	public int allocateBlock() {
 
 		// for de 129 a NUM_Block-1
-		// isUsedBlock de i
+		// isBlockUsed de i
 		// si i n'est pas utilisé -> setBlockUsed
 		// si mémoire pleine --> retourne -1
 		
 		for (int i = 129; i < NUM_BLOCKS; i++){
-			if (isUsedBlock(i) == 0) {
+			if (isBlockUsed(i) == 0) {
 				setBlockUsed(i, true);
 				return i;
 			}
-			return -1;
 		}
+		return -1;
 	}
 }
