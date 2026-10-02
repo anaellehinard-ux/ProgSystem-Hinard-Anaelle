@@ -15,9 +15,10 @@ public class Inode {
     }
 
     public int getInodeOffset() {
-        // TODO:
-        // Calculer l'offset exact de l'inode.
-        return 0;
+		// On décale le début de la table des inodes avec 
+		// MemoryManager.INODE_TABLE_OFFSET.
+		// On saute les x inodes d'avant de 128 octets
+        return MemoryManager.INODE_TABLE_OFFSET + (inodeNumber * INODE_SIZE);
     }
 
     public int getFileType() {
