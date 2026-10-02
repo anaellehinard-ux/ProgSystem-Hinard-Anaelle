@@ -31,10 +31,12 @@ public class Inode {
     }
 
     public int getFileSize() {
-        // TODO:
-        // Lire la taille à offset + 8.
-        return 0;
-    }
+        byte[] memory = memoryManager.getFilesystemMemory();
+		 // Décalage de 8 octets par rapport au début de l'inode
+        int offset = getInodeOffset() + 8;
+
+        // Lecture avec la classe Utils
+        return Utils.readInt(memory, offset);
 
     public int[] getDirectPointers() {
 
