@@ -62,4 +62,74 @@ public class Inode {
         }
         return pointers;
     }
+	
+	public void writeToMemory(
+        int fileType,
+        int fileSize,
+        long creationTime,
+        long modificationTime,
+        int[] directPointers,
+        int indirectPointer,
+        short permissions,
+        int linkCount) {
+
+		byte[] memory =
+				memoryManager.getFilesystemMemory();
+
+		int offset = getInodeOffset();
+
+		// 1. Numéro d'inode
+		Utils.writeInt(memory, offset, this.inodeNumber);
+		offset = offset + 4;
+		
+		// 2. Type
+		Utils.writeInt(memory, offset, fileType);
+		offset = offset + 4;
+		
+		// 3. Taille
+		Utils.writeInt(memory, offset, fileSize);
+		offset = offset + 4;
+		
+		// 4. Création
+		Utils.writeLong(memory, offset, creationTime);
+		offset = offset + 8;
+		
+		// 5. Modification
+		Utils.writeLong(memory, offset, modificationTime);
+		offset = offset + 8;
+		
+		// 6. 10 pointeurs directs
+		for (int i = 0; i < DIRECT_POINTERS; i++) {
+			/**
+			 * Explication :
+			 * 
+			 * On initialise le pointeur à 0 (bloc non alloué).
+			 * Si le tableau n'est pas nul ET que l'indice i
+			 * ne dépasse pas la taille du tableau,
+			 * alors on récupère la vraie valeur du pointeur.
+			 */
+			int pointeur = 0;
+
+			if (directPointers != null) {
+				if (i < directPointers.length) {
+					pointeur = directPointers[i];
+				}
+			}
+			
+			Utils.writeInt(memory, offset, pointeur);
+			offset = offset + 4;
+		}
+		
+		// 7. Pointeur indirect
+		Utils.writeInt(memory, offset, indirectPointer);
+		offset = offset + 4;
+		
+		// 8. Permissions
+		Utils.writeShort(memory, offset, permissions);
+		offset = offset + 2;
+		
+		// 9. Nombre de liens
+		Utils.writeInt(memory, offset, linkCount);
+		offset = offset + 4;
+	}
 }
