@@ -39,7 +39,7 @@ public class Inode {
 
         // Lecture avec la classe Utils
         return Utils.readInt(memory, offset);
-
+	}
 
     public int[] getDirectPointers() {
 
