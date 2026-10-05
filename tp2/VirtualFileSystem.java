@@ -41,9 +41,37 @@ public class VirtualFileSystem {
             return false;
         }
 
-        // TODO:
-        // Construire l'inode.
-        // L'initialiser comme fichier vide.
+        // Construiction de l'inode
+        Inode inode = new Inode(memoryManager, inodeNum);
+
+        // Créer un fichier vide :
+		
+		// 0 = libre et 1 = non libre
+        int fileType = 1;
+		
+		// 0 octet = fichier vide
+        int fileSize = 0;    
+
+		// Timestamp de création et ou de modification		
+        long currentTime = System.currentTimeMillis();
+		
+		// les 10 pointeurs initialisés à 0
+        int[] directPointers = new int[Inode.DIRECT_POINTERS];
+		
+		// Pas de bloc indirect
+        int indirectPointer = 0;  
+
+		// Permissions de lecture et d'écriture
+        short permissions = 0644;  
+		
+		// 1 lien initial		
+        int linkCount = 1;                             
+
+
+        // Écriture physique des données dans le Virtual File System
+        inode.writeToMemory(fileType, fileSize, currentTime, currentTime,
+							directPointers, indirectPointer, permissions,
+							linkCount);
 
         return true;
     }
