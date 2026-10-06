@@ -169,5 +169,58 @@ public class VirtualFileSystem {
         );
 		return true;
 	}
+	
+	public byte[] readFile(int inodeNum) {
 
+		Inode inode =
+				new Inode(memoryManager, inodeNum);
+
+		int fileSize =
+				inode.getFileSize();
+
+		if (fileSize == 0) {
+			return new byte[0];
+		}
+
+		byte[] fileData =
+				new byte[fileSize];
+
+		byte[] memory =
+				memoryManager.getFilesystemMemory();
+
+		int[] blockPointers =
+				inode.getDirectPointers();
+
+		
+		int blocksNeeded ;
+		blocksNeeded = (fileSize + MemoryManager.BLOCK_SIZE - 1) / MemoryManager.BLOCK_SIZE;
+
+		int bytesRemaining ;
+		bytesRemaining = fileSize;
+		
+		int dataDestOffset;
+		dataDestOffset = 0;
+
+		for (int i = 0; i < blocksNeeded; i++) {
+			// Taille du fragment à lire pour le bloc
+			int bytesToCopy;
+			bytesToCopy = Math.min(bytesRemaining, MemoryManager.BLOCK_SIZE);
+
+			// Numéro du bloc et son adresse en mémoire
+			int blockNum;
+			blockNum = blockPointers[i];
+			
+			int blockOffset;
+			blockOffset = blockNum * MemoryManager.BLOCK_SIZE;
+
+			// Copie des données du bloc vers le tableau fileData
+			System.arraycopy(memory, blockOffset, fileData, dataDestOffset, bytesToCopy);
+
+			// Décalage des curseurs
+			dataDestOffset = dataDestOffset + bytesToCopy;
+			bytesRemaining = bytesRemaining - bytesToCopy;
+		}
+
+		return fileData;
+	}
 }
