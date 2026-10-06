@@ -393,7 +393,96 @@ public class TestRunner {
 					"Octet incorrect à l'indice " + i;
 		}
 
+
+		
+		//Test : Fichier égal à un bloc (512 octets)
+		assert vfs.createFile("/", "exact_512.txt");
+
+		byte[] data512 = new byte[512];
+		for (int i = 0; i < 512; i++) {
+			data512[i] = (byte) (i % 256);
+		}
+
+		assert vfs.writeFile(1, data512) : 
+				"L'écriture du fichier de 512 octets a échoué";[cite: 10]
+
+		MemoryManager mm = vfs.getMemoryManager();
+		Inode inode1 = new Inode(mm, 1);
+
+		// Vérification de la taille dans l'inode
+		assert inode1.getFileSize() == 512 : 
+				"L'inode doit contenir une taille de 512";[cite: 10]
+
+		// Vérification qu'un seul pointeur direct est utilisé
+		int[] ptrs1 = inode1.getDirectPointers();
+		assert ptrs1[0] != 0 : "Le premier pointeur direct doit être alloué";
+		assert ptrs1[1] == 0 : "Un seul pointeur direct doit être utilisé";[cite: 10]
+
+		// Vérification directe dans memory
+		byte[] memory = mm.getFilesystemMemory();
+		int offset1 = ptrs1[0] * MemoryManager.BLOCK_SIZE;
+		for (int i = 0; i < 512; i++) {
+			assert memory[offset1 + i] == data512[i] : 
+					"Octet physique incorrect à l'index " + i;[cite: 10]
+		}
+
+		// Vérification de la relecture
+		byte[] read512 = vfs.readFile(1);
+		assert read512.length == 512 : "La lecture doit restituer 512 octets";
+		for (int i = 0; i < 512; i++) {
+			assert read512[i] == data512[i] : 
+					"La lecture n'a pas restitué exactement les mêmes octets";[cite: 10]
+		}
+
+
+		//Test : Fichier de 513 octets
+		assert vfs.createFile("/", "exact_513.txt");
+
+		byte[] data513 = new byte[513];
+		for (int i = 0; i < 513; i++) {
+			data513[i] = (byte) (i % 100);
+		}
+
+		assert vfs.writeFile(2, data513) : 
+				"L'écriture du fichier de 513 octets a échoué";[cite: 10]
+
+		Inode inode2 = new Inode(mm, 2);
+		int[] ptrs2 = inode2.getDirectPointers();
+
+		// Vérification qu'exactement 2 blocs sont utilisés
+		assert ptrs2[0] != 0 && ptrs2[1] != 0 : "Deux blocs doivent être alloués";
+		assert ptrs2[2] == 0 : "Le troisième bloc doit rester libre";
+
+		// Vérification physique : 512 premiers octets dans bloc 1, le 513ème dans bloc 2
+		int block1Offset = ptrs2[0] * MemoryManager.BLOCK_SIZE;
+		int block2Offset = ptrs2[1] * MemoryManager.BLOCK_SIZE;
+
+		for (int i = 0; i < 512; i++) {
+			assert memory[block1Offset + i] == data513[i] : 
+					"Octet physique du premier bloc incorrect";[cite: 10]
+		}
+		assert memory[block2Offset] == data513[512] : 
+				"Le 513ème octet doit être placé dans le second bloc";[cite: 10]
+
+		// Vérification globale via readFile
+		byte[] read513 = vfs.readFile(2);
+		assert read513.length == 513;
+		for (int i = 0; i < 513; i++) {
+			assert read513[i] == data513[i] : 
+					"Octet lu incorrect à l'index " + i;
+		}
+
+
+		//Test de dépassement supérieur a 10 blocs
+		assert vfs.createFile("/", "trop_grand.txt");
+
+		// Fichier nécessitant 11 blocs (11 * 512 = 5632 octets)
+		byte[] dataTooBig = new byte[11 * MemoryManager.BLOCK_SIZE]; 
+
+		boolean writeTooBigResult = vfs.writeFile(3, dataTooBig);
+		assert !writeTooBigResult : 
+				"L'écriture doit être refusée car L > 10 * 512";[cite: 10]
+
 		System.out.println("[OK] Étape 9 validée !");
 	}
-
 }
