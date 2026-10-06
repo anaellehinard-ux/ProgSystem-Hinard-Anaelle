@@ -118,7 +118,6 @@ public class MemoryManager {
 		int bitPosition = blockNumber % 8;
 		int offset = BITMAP_OFFSET + byteIndex;
 		
-		int byteInderx;
 		
 		/**
 		 * explication :
@@ -136,9 +135,7 @@ public class MemoryManager {
 		 * Sinon si on obtiens 0 c'est libre.
 		 */
 		
-		byteInderx = (memory[offset] >> bitPosition) & 1;
-		
-		return byteInderx;
+		return ((memory[offset] & 0xFF) >> bitPosition) & 1;
 	}
 
 	public int allocateBlock() {
