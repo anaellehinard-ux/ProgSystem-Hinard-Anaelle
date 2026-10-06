@@ -79,4 +79,95 @@ public class VirtualFileSystem {
     public MemoryManager getMemoryManager() {
         return memoryManager;
     }
+	
+	public boolean writeFile(
+        int inodeNum,
+        byte[] data) {
+
+		int blocksNeeded =
+				(data.length
+				+ MemoryManager.BLOCK_SIZE - 1)
+				/ MemoryManager.BLOCK_SIZE;
+
+		if (blocksNeeded > Inode.DIRECT_POINTERS) {
+			return false;
+		}
+
+		int[] blockPointers =
+				new int[Inode.DIRECT_POINTERS];
+
+		//Allouer les blocs nécessaires avec le bitmap de MemoryManager
+        for (int i = 0; i < blocksNeeded; i++) {
+            int blockNum;
+			blockNum = memoryManager.allocateBlock();
+            
+            // Si la mémoire est pleine = allocation échouée
+            if (blockNum == -1) {
+                return false;
+            }
+            
+            blockPointers[i] = blockNum;
+        }
+
+		byte[] memory =
+				memoryManager.getFilesystemMemory();
+
+		int bytesRemaining =
+				data.length;
+
+		int dataSrcOffset = 0;
+		
+        for (int i = 0; i < blocksNeeded; i++) {
+            // Calculer le nombre à copier pour ce bloc (max -> BLOCK_SIZE)
+            int bytesToCopy;
+			bytesToCopy = Math.min(bytesRemaining, MemoryManager.BLOCK_SIZE);
+            
+            // Récupérer le numéro du bloc
+            int blockNum;
+			blockNum = blockPointers[i];
+            
+            // Calculer l'offset dans la mémoire
+            int blockOffset;
+            blockOffset = blockNum * MemoryManager.BLOCK_SIZE;
+            
+            // Copie des données du tableau vers la mémoire
+            System.arraycopy(data, dataSrcOffset, memory, blockOffset, bytesToCopy);
+            
+            // Mise à jour des pointeurs de lecture/écriture
+            dataSrcOffset = dataSrcOffset + bytesToCopy;
+            bytesRemaining = bytesRemaining - bytesToCopy;
+        }
+
+        //Mise à jour de l'inode avec les nouveaux paramètres
+        Inode inode = new Inode(memoryManager, inodeNum);
+        
+        long currentTime ;
+        currentTime = System.currentTimeMillis();
+        
+        inode.writeToMemory(
+                1,           
+				// Nouvelle taille (en octets)
+                data.length,  
+				
+				// Date de création
+                currentTime,  
+				
+				// Date de modification
+                currentTime, 
+				
+				// Nouveaux pointeurs
+                blockPointers, 
+				
+				// Pas de pointeur indirect
+                0, 
+				
+				// Permissions
+                (short) 0644,      
+				
+				// Nombre de liens               
+			    1                        
+        );
+		return true;
+	}
+
 }
