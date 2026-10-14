@@ -15,7 +15,7 @@ public class Calcule extends Thread {
     public void run() {
         int res = 0;
         for (int i = 0; i < multiplicateur; i++) {
-            resultat += valeur * valeur + valeur;
+            res += valeur * valeur + valeur;
         }
 
         this.resultat = res;
